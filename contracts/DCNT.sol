@@ -5,7 +5,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 /// @title Decentralized Creator Vaults (DCVs)
 /// @notice claimable ERC20s for NFT holders after vault expiration 
@@ -28,6 +27,8 @@ contract DCNT is ERC721Enumerable, Ownable {
   /// @param sender recipient of NFT mint
   /// @param tokenId_ of token minted
   event Minted(address sender, uint256 tokenId_);
+
+  /// ============ Constructor ============
 
   constructor(
     string memory name, 

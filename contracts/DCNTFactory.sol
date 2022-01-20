@@ -10,15 +10,15 @@ contract DCVFactory {
   DCNTVault public immutable dcntVault;
 
   constructor (
-    address vaultDistributionToken_, 
-    uint256 unlockDate_,
+    address _vaultDistributionToken, 
+    uint256 _unlockDate,
     string memory nftName, 
     string memory nftSymbol, 
-    uint256 maxTokens_,
-    uint256 tokenPrice_,
-    uint256 maxTokenPurchase_
+    uint256 _maxTokens,
+    uint256 _tokenPrice,
+    uint256 _maxTokenPurchase
   ) {
-    dcnt = new DCNT(nftName, nftSymbol, maxTokens_, tokenPrice_, maxTokenPurchase_);
-    dcntVault = new DCNTVault(vaultDistributionToken_, address(dcnt), unlockDate_);
+    dcnt = new DCNT(nftName, nftSymbol, _maxTokens, _tokenPrice, _maxTokenPurchase);
+    dcntVault = new DCNTVault(_vaultDistributionToken, address(dcnt), _unlockDate);
   }
 }

@@ -16,7 +16,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 
 /// @title Decentralized Creator Nonfungible Token Vaults (DCNT Vaults)
 /// @notice claimable ERC20s for NFT holders after vault expiration 
-/// @author Will Kantaros <twitter @willkantaros>
 contract DCNTVault {
 
   /// ============ Immutable storage ============
