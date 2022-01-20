@@ -14,17 +14,17 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 
 
-/// @title Decentralized Creator Vaults (DCVs)
+/// @title Decentralized Creator Nonfungible Token Vaults (DCNT Vaults)
 /// @notice claimable ERC20s for NFT holders after vault expiration 
 /// @author Will Kantaros <twitter @willkantaros>
-contract DCV {
+contract DCNTVault {
 
   /// ============ Immutable storage ============
 
   /// @notice vault token to be distributed to token holders
   IERC20 public immutable vaultDistributionToken;
   /// @notice "ticket" token held by user
-  IERC721Enumerable public immutable DCRT;
+  IERC721Enumerable public immutable DCNT;
   /// @notice unlock date when distribution can start happening
   uint256 public immutable unlockDate;
 
@@ -44,23 +44,21 @@ contract DCV {
 
   /// @notice Thrown if address has already claimed
   error AlreadyClaimed();
-  // /// @notice Thrown if address/amount are not part of Merkle tree
-  // error NotInMerkle();
 
   /// ============ Constructor ============
 
   /// @notice Creates a new MerkleClaimERC20 contract
   /// @param _vaultDistributionToken of token
-  /// @param _DCRTAddress of token
+  /// @param _DCNTAddress of token
   /// @param _unlockDate date of vault expiration
   constructor(
     // for our purpose USDC = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
     address _vaultDistributionToken, 
-    address _DCRTAddress,
+    address _DCNTAddress,
     uint256 _unlockDate
   ) {
     vaultDistributionToken = IERC20(_vaultDistributionToken);
-    DCRT = IERC721Enumerable(_DCRTAddress);
+    DCNT = IERC721Enumerable(_DCNTAddress);
     unlockDate = _unlockDate;
   }
 
@@ -70,17 +68,17 @@ contract DCV {
     return vaultDistributionToken.balanceOf(address(this));
   }
 
-  function amountClaimed(uint256 numDCRTs) public view returns (uint256) {
+  function amountClaimed(uint256 numDCNTs) public view returns (uint256) {
     // TODO - look into how division works
-    return numDCRTs / vaultBalance();
+    return numDCNTs / vaultBalance();
   }
 
   function claimAll(address to) external {
     require(block.timestamp >= unlockDate, 'vault is still locked');
-    uint256 numTokens = DCRT.balanceOf(to);
+    uint256 numTokens = DCNT.balanceOf(to);
     uint256 tokensToClaim = 0;
     for (uint256 i = 0; i < numTokens; i++){
-      uint256 tokenId = DCRT.tokenOfOwnerByIndex(to, i);
+      uint256 tokenId = DCNT.tokenOfOwnerByIndex(to, i);
       if (!hasClaimedTokenId[tokenId]) {
         tokensToClaim++;
         hasClaimedTokenId[tokenId] = true;
@@ -94,7 +92,7 @@ contract DCV {
   // TODO: is this method necessary???
   function claim(address to, uint256 tokenId) external {
     require(block.timestamp >= unlockDate, 'vault is still locked');
-    require(DCRT.ownerOf(tokenId) == to, 'address does not own token');
+    require(DCNT.ownerOf(tokenId) == to, 'address does not own token');
     if (hasClaimedTokenId[tokenId]) revert AlreadyClaimed();
     // mark it claimed and send token (confused why doing this before not after calling transfer)
     hasClaimedTokenId[tokenId] = true;

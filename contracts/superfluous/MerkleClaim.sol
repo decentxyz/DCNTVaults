@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
+ * Note: this is how our "vaults" would look if we took a snapshot + distributed
+ * (as opposed to DCNT)
  * Drawing heavily from the work at Uniswap + Mirror in their two contracts:
  * https://github.com/Uniswap/merkle-distributor/blob/master/contracts/MerkleDistributor.sol
  * https://github.com/mirror-xyz/splits/blob/main/contracts/Splitter.sol

@@ -1,18 +1,32 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.0;
+
+/// ============ Imports ============
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract DCRT is ERC721Enumerable, Ownable {
+/// @title Decentralized Creator Vaults (DCVs)
+/// @notice claimable ERC20s for NFT holders after vault expiration 
+contract DCNT is ERC721Enumerable, Ownable {
+
+  /// ============ Immutable storage ============
 
   uint256 public immutable MAX_TOKENS;
   uint256 public immutable tokenPrice;
   uint256 public immutable maxTokenPurchase;
+
+  /// ============ Mutable storage ============
+
   bool public saleIsActive = false;
   string public baseURI;
 
+  /// ============ Events ============
+
+  /// @notice Emitted after a successful token claim
+  /// @param sender recipient of NFT mint
+  /// @param tokenId_ of token minted
   event Minted(address sender, uint256 tokenId_);
 
   constructor(
@@ -27,8 +41,8 @@ contract DCRT is ERC721Enumerable, Ownable {
     maxTokenPurchase = maxTokenPurchase_;
   }
 
-  function mintRNFT(uint numberOfTokens) public payable {
-    require(saleIsActive, "Sale must be active to mint an RNFT");
+  function mintDCNT(uint numberOfTokens) public payable {
+    require(saleIsActive, "Sale must be active to mint an DCNT");
     require(totalSupply() <= MAX_TOKENS, "SOLD OUT: Have exceded total supply");
     require(numberOfTokens <= maxTokenPurchase, "Can only mint 20 tokens at a time");
     require(totalSupply() + numberOfTokens < MAX_TOKENS, "Purchase would exceed max supply");
@@ -59,7 +73,7 @@ contract DCRT is ERC721Enumerable, Ownable {
   }
 
   // save some for creator
-  function reserveDCRT(uint256 numReserved) public onlyOwner {        
+  function reserveDCNT(uint256 numReserved) public onlyOwner {        
     uint256 supply = totalSupply();
     for (uint256 i = 0; i < numReserved; i++) {
       _safeMint(msg.sender, supply + i);
