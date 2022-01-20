@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./DCNTVault.sol";
 import "./DCNT.sol";
 
-contract DCVFactory {
+contract DCNTVaultFactory {
   // unsure if should be immutable - assume yes?
   DCNT public immutable dcnt;
   DCNTVault public immutable dcntVault;
