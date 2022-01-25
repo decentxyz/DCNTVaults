@@ -43,15 +43,15 @@ contract DCNT is ERC721Enumerable, Ownable {
   }
 
   function mintDCNT(uint numberOfTokens) public payable {
+    uint256 mintIndex = totalSupply();
     require(saleIsActive, "Sale must be active to mint an DCNT");
-    require(totalSupply() <= MAX_TOKENS, "SOLD OUT: Have exceded total supply");
+    require(mintIndex <= MAX_TOKENS, "SOLD OUT: Have exceded total supply");
     require(numberOfTokens <= maxTokenPurchase, "Can only mint 20 tokens at a time");
-    require(totalSupply() + numberOfTokens < MAX_TOKENS, "Purchase would exceed max supply");
+    require(mintIndex + numberOfTokens < MAX_TOKENS, "Purchase would exceed max supply");
     require(msg.value >= (tokenPrice * numberOfTokens), "Insufficient funds");
 
     for(uint256 i = 0; i < numberOfTokens; i++) {
-      uint256 mintIndex = totalSupply();
-      _safeMint(msg.sender, mintIndex);
+      _safeMint(msg.sender, mintIndex++);
       emit Minted(msg.sender, mintIndex);
     }
   }
