@@ -9,7 +9,6 @@ pragma solidity ^0.8.0;
 
 /// ============ Imports ============
 
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 
@@ -23,7 +22,7 @@ contract DCNTVault {
   /// @notice vault token to be distributed to token holders
   IERC20 public immutable vaultDistributionToken;
   /// @notice "ticket" token held by user
-  IERC721Enumerable public immutable DCNT;
+  IERC721Enumerable public immutable nftVaultKey;
   /// @notice unlock date when distribution can start happening
   uint256 public immutable unlockDate;
 
@@ -46,18 +45,18 @@ contract DCNTVault {
 
   /// ============ Constructor ============
 
-  /// @notice Creates a new MerkleClaimERC20 contract
-  /// @param _vaultDistributionToken of token
-  /// @param _DCNTAddress of token
+  /// @notice Creates a new vault
+  /// @param _vaultDistributionTokenAddress of token
+  /// @param _nftVaultKeyAddress of token
   /// @param _unlockDate date of vault expiration
   constructor(
     // for our purpose USDC = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
-    address _vaultDistributionToken, 
-    address _DCNTAddress,
+    address _vaultDistributionTokenAddress, 
+    address _nftVaultKeyAddress,
     uint256 _unlockDate
   ) {
-    vaultDistributionToken = IERC20(_vaultDistributionToken);
-    DCNT = IERC721Enumerable(_DCNTAddress);
+    vaultDistributionToken = IERC20(_vaultDistributionTokenAddress);
+    nftVaultKey = IERC721Enumerable(_nftVaultKeyAddress);
     unlockDate = _unlockDate;
   }
 
@@ -67,31 +66,34 @@ contract DCNTVault {
     return vaultDistributionToken.balanceOf(address(this));
   }
 
-  function amountClaimed(uint256 numDCNTs) public view returns (uint256) {
-    // TODO - look into how division works
-    return numDCNTs / vaultBalance();
+  function amountClaimed(uint256 numNftVaultKeys) private view returns (uint256) {
+    return numNftVaultKeys / vaultBalance();
   }
 
+  // claim all the tokens from Nft
   function claimAll(address to) external {
     require(block.timestamp >= unlockDate, 'vault is still locked');
-    uint256 numTokens = DCNT.balanceOf(to);
+    require(vaultBalance() > 0, 'vault is empty');
+    uint256 numTokens = nftVaultKey.balanceOf(to);
     uint256 tokensToClaim = 0;
     for (uint256 i = 0; i < numTokens; i++){
-      uint256 tokenId = DCNT.tokenOfOwnerByIndex(to, i);
+      uint256 tokenId = nftVaultKey.tokenOfOwnerByIndex(to, i);
       if (!hasClaimedTokenId[tokenId]) {
         tokensToClaim++;
         hasClaimedTokenId[tokenId] = true;
       }
     }
+    // require(tokensToClaim > 0, 'address does not own token');
     uint256 amount = amountClaimed(tokensToClaim);
     require(vaultDistributionToken.transfer(to, amount), 'Transfer failed');
     emit Claimed(to, amount);
   }
 
-  // TODO: is this method necessary???
+  // would this be necessary if have a claimAll? for flexibility yes but tbd 
   function claim(address to, uint256 tokenId) external {
     require(block.timestamp >= unlockDate, 'vault is still locked');
-    require(DCNT.ownerOf(tokenId) == to, 'address does not own token');
+    require(vaultBalance() > 0, 'vault is empty');
+    require(nftVaultKey.ownerOf(tokenId) == to, 'address does not own token');
     if (hasClaimedTokenId[tokenId]) revert AlreadyClaimed();
     // mark it claimed and send token (confused why doing this before not after calling transfer)
     hasClaimedTokenId[tokenId] = true;

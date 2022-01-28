@@ -6,9 +6,10 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @title Decentralized Creator Vaults (DCVs)
+/// 
+/// @title Decentralized Creator Nonfungible Tokens
 /// @notice claimable ERC20s for NFT holders after vault expiration 
-contract DCNT is ERC721Enumerable, Ownable {
+contract DecentNft is ERC721Enumerable, Ownable {
 
   /// ============ Immutable storage ============
 
@@ -42,9 +43,9 @@ contract DCNT is ERC721Enumerable, Ownable {
     maxTokenPurchase = maxTokenPurchase_;
   }
 
-  function mintDCNT(uint numberOfTokens) public payable {
+  function mintDecentNft(uint numberOfTokens) public payable {
     uint256 mintIndex = totalSupply();
-    require(saleIsActive, "Sale must be active to mint an DCNT");
+    require(saleIsActive, "Sale must be active to mint");
     require(mintIndex <= MAX_TOKENS, "SOLD OUT: Have exceded total supply");
     require(numberOfTokens <= maxTokenPurchase, "Can only mint 20 tokens at a time");
     require(mintIndex + numberOfTokens < MAX_TOKENS, "Purchase would exceed max supply");
