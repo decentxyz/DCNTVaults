@@ -173,8 +173,10 @@ describe("DCNTVault contract", () => {
         it("should transfer 20 tokens to the user's account", async () => {
           console.log(await nft.balanceOf(addr1.address));
           // console.log(await vault.vaultBalance());
-          await unlockedVault.claimAll(addr1.address)
-          expect(await token.balanceOf(addr1.address)).to.equal(20)
+          console.log('here mf');
+          console.log(await unlockedVault.claimAll(addr1.address));
+          console.log(await token.balanceOf(addr1.address));
+          expect(await token.balanceOf(addr1.address)).to.equal(20);
         })
       })
 
