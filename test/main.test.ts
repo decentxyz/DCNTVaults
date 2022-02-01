@@ -43,8 +43,7 @@ describe("DCNTVault contract", () => {
   let addr1: SignerWithAddress, 
       addr2: SignerWithAddress, 
       addr3: SignerWithAddress, 
-      addr4: SignerWithAddress,
-      addr5: SignerWithAddress;
+      addr4: SignerWithAddress;
 
   describe("basic tests", () => {
 
@@ -77,17 +76,17 @@ describe("DCNTVault contract", () => {
       })
       
       describe("and 50 tokens are added to the vault", async () => {
+
         it("should have a vault balance of 50", async () => {
           await token.connect(addr1).transfer(vault.address, 50);
-          // console.log(await token.transfer(vault.address, 100));
           expect(await vault.vaultBalance()).to.equal(50);
         })
       })
       
       describe("and 50 more tokens are added to the vault", async () => {
+
         it("should have a vault balance of 100", async () => {
           await token.connect(addr1).transfer(vault.address, 100);
-          // console.log(await token.transfer(vault.address, 100));
           expect(await vault.vaultBalance()).to.equal(100);
         })
       })
@@ -114,7 +113,7 @@ describe("DCNTVault contract", () => {
         Math.floor(tomorrow.getTime() / 1000)
       )
 
-      // send 100 tokens to the vaul
+      // send 100 tokens to the vault
       await token.connect(addr1).transfer(vault.address, 100);
     })
 
@@ -138,7 +137,7 @@ describe("DCNTVault contract", () => {
     })
 
     before(async () => {
-      [addr1, addr2, addr3, addr4, addr5] = await ethers.getSigners();
+      [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       let yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
 
@@ -165,8 +164,9 @@ describe("DCNTVault contract", () => {
 
       describe("and a user without any nft keys tries to redeem tokens", async () => {
         it("he would recieve zero tokens", async () => {
-          await unlockedVault.claimAll(addr4.address);
-          expect(await token.balanceOf(addr4.address)).to.equal(0)
+          await expect(unlockedVault.claimAll(addr4.address)).to.be.revertedWith(
+            'no tokens to claim'
+          );
         })
       })
 
@@ -179,15 +179,14 @@ describe("DCNTVault contract", () => {
 
       describe("and a user who has already redeemed his tokens tries to redeem again", async () => {
         it("should prevent the user from doing this", async () => {
-          await unlockedVault.claimAll(addr1.address)
-          // balance will still equal 20
-          expect(await token.balanceOf(addr1.address)).to.equal(20)
+          await expect(unlockedVault.claimAll(addr1.address)).to.be.revertedWith(
+            'no tokens to claim'
+          );
         })
       })
       
       describe("and a user with two nfts tries to redeem tokens (2/5 * 100)", async () => {
         it("should should transfer 40 tokens to the user's account", async () => {
-          // console.log(await vault.vaultBalance());
           await unlockedVault.claimAll(addr2.address)
           // balance will equal 40
           expect(await token.balanceOf(addr2.address)).to.equal(40)
@@ -198,30 +197,50 @@ describe("DCNTVault contract", () => {
 
   describe("claiming division tests", async () => {
     before(async () => {
-      [addr1, addr2, addr3] = await ethers.getSigners();
-      let currentDate = new Date();
+      [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       nft = await deployNFT();
       token = await deployERC20(73);
+      
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      await nft.connect(addr1).mintNft(3);
+      await nft.connect(addr2).mintNft(1);
+      await nft.connect(addr3).mintNft(1);
+      await nft.connect(addr4).mintNft(6);
       // token.setBalance(owner.address, 100);
-      vault = await deployDCNTVault(
+      unlockedVault = await deployDCNTVault(
         token.address,
         nft.address,
-        Math.floor(currentDate.getTime() / 1000)
+        Math.floor(yesterday.getTime() / 1000)
       )
+      await token.connect(addr1).transfer(unlockedVault.address, 73);
     })
 
     describe("and a user with three of eleven nfts tries to redeem tokens (3/11 * 73)", async () => {
       it("should should transfer 19.9(~ish) tokens to the user's account", async () => {
-
+        await unlockedVault.claimAll(addr1.address);
+        expect(await token.balanceOf(addr1.address)).to.equal(19);
       })
     })
 
     describe("and he then receives another one and tries to redeem it", async () => {
-
+      it("should should transfer 6.6(~ish) tokens to the user's account (1/11 * 73)", async () => {
+        // await nft.connect(addr2).safeTransferFrom(addr2.address, addr1.address, 3);
+        await nft.connect(addr2)["safeTransferFrom(address,address,uint256)"](addr2.address, addr1.address, 3);
+        await unlockedVault.claimAll(addr1.address);
+        expect(await token.balanceOf(addr1.address)).to.equal(25);
+      })
     }) 
     
     describe("and he then receives another one thats already been claimed and tries to redeem it", async () => {
-      
+      it("should should return an error", async () => {
+        await unlockedVault.claimAll(addr3.address);
+        await nft.connect(addr3)["safeTransferFrom(address,address,uint256)"](addr3.address, addr1.address, 4);
+        await expect(unlockedVault.claimAll(addr1.address)).to.be.revertedWith(
+          'no tokens to claim'
+        );
+      })
     })
   })
 })

@@ -1,14 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
-/// Questions:
-///   Should be using SafeERC20 (https://docs.openzeppelin.com/contracts/4.x/api/token/erc20)
-///   Should fields be stored as addresses or contracts (IERC20/721)
-///   Gas improvement as a whole
-
-
 /// ============ Imports ============
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -21,7 +13,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract DCNTVault is Ownable {
 
   /// ============ Immutable storage ============
-  uint256 public constant PERCENTAGE_SCALE = 10e5;
 
   /// @notice vault token to be distributed to token holders
   IERC20 public immutable vaultDistributionToken;
@@ -104,10 +95,10 @@ contract DCNTVault is Ownable {
         hasClaimedTokenId[tokenId] = true;
       }
     }
-
     // require(tokensToClaim > 0, 'address does not own token');
     // console.log("tokens to claim: %s", tokensToClaim);
     uint256 amount = _pendingPayment(tokensToClaim, vaultBalance() + totalReleased());
+    require(amount > 0, 'no tokens to claim');
     require(vaultDistributionToken.transfer(to, amount), 'Transfer failed');
     _totalReleased += amount;
     emit Claimed(to, amount);
