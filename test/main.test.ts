@@ -117,7 +117,8 @@ describe("DCNTVault contract", () => {
       // send 100 tokens to the vaul
       await token.connect(addr1).transfer(vault.address, 100);
     })
-    describe("and the vault has not expired yet", async () => {
+
+    describe("and the vault is locked", async () => {
       
       describe("and a user with an nft tries to pull out money", async () => {
         it("should produce a warning preventing this", async () => {
@@ -138,8 +139,8 @@ describe("DCNTVault contract", () => {
 
     before(async () => {
       [addr1, addr2, addr3, addr4, addr5] = await ethers.getSigners();
-      let tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() - 1);
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
 
       nft = await deployNFT();
       token = await deployERC20(100);
@@ -153,7 +154,7 @@ describe("DCNTVault contract", () => {
       unlockedVault = await deployDCNTVault(
         token.address,
         nft.address,
-        Math.floor(tomorrow.getTime() / 1000)
+        Math.floor(yesterday.getTime() / 1000)
       )
 
       // send 100 tokens to the vault
@@ -171,48 +172,43 @@ describe("DCNTVault contract", () => {
 
       describe("and a user with one nft tries to redeem his tokens (1/5 nfts * 100 tokens)", async () => {
         it("should transfer 20 tokens to the user's account", async () => {
-          console.log(await nft.balanceOf(addr1.address));
-          // console.log(await vault.vaultBalance());
-          console.log('here mf');
-          console.log(await unlockedVault.claimAll(addr1.address));
-          console.log(await token.balanceOf(addr1.address));
+          await unlockedVault.claimAll(addr1.address)
           expect(await token.balanceOf(addr1.address)).to.equal(20);
         })
       })
 
-    //   describe("and a user who has already redeemed his tokens tries to redeem again", async () => {
-    //     it("should prevent the user from doing this", async () => {
-    //       // console.log(await vault.vaultBalance());
-    //       await vault.claimAll(addr1.address)
-    //       // balance will still equal 20
-    //       expect(token.balanceOf(addr1.address)).to.equal(20)
-    //     })
-    //   })
+      describe("and a user who has already redeemed his tokens tries to redeem again", async () => {
+        it("should prevent the user from doing this", async () => {
+          await unlockedVault.claimAll(addr1.address)
+          // balance will still equal 20
+          expect(await token.balanceOf(addr1.address)).to.equal(20)
+        })
+      })
       
-    //   describe("and a user with two nfts tries to redeem tokens (2/5 * 100)", async () => {
-    //     it("should should transfer 40 tokens to the user's account", async () => {
-    //       // console.log(await vault.vaultBalance());
-    //       await vault.claimAll(addr2.address)
-    //       // balance will still equal 20
-    //       expect(token.balanceOf(addr2.address)).to.equal(40)
-    //     })
-    //   })
+      describe("and a user with two nfts tries to redeem tokens (2/5 * 100)", async () => {
+        it("should should transfer 40 tokens to the user's account", async () => {
+          // console.log(await vault.vaultBalance());
+          await unlockedVault.claimAll(addr2.address)
+          // balance will equal 40
+          expect(await token.balanceOf(addr2.address)).to.equal(40)
+        })
+      })
     })
   })
 
   describe("claiming division tests", async () => {
-    // before(async () => {
-    //   [addr1, addr2, addr3] = await ethers.getSigners();
-    //   let currentDate = new Date();
-    //   nft = await deployNFT();
-    //   token = await deployERC20(73);
-    //   // token.setBalance(owner.address, 100);
-    //   vault = await deployDCNTVault(
-    //     token.address,
-    //     nft.address,
-    //     Math.floor(currentDate.getTime() / 1000)
-    //   )
-    // })
+    before(async () => {
+      [addr1, addr2, addr3] = await ethers.getSigners();
+      let currentDate = new Date();
+      nft = await deployNFT();
+      token = await deployERC20(73);
+      // token.setBalance(owner.address, 100);
+      vault = await deployDCNTVault(
+        token.address,
+        nft.address,
+        Math.floor(currentDate.getTime() / 1000)
+      )
+    })
 
     describe("and a user with three of eleven nfts tries to redeem tokens (3/11 * 73)", async () => {
       it("should should transfer 19.9(~ish) tokens to the user's account", async () => {
