@@ -69,11 +69,7 @@ contract DCNTVault is Ownable {
     return _totalReleased;
   }
 
-  // return (vault balance) * (nfts_owned/total_nfts)
-  function amountClaimed(uint256 numNftVaultKeys) private view returns (uint256) {    
-    return (numNftVaultKeys * vaultBalance()) / nftVaultKey.totalSupply();
-  }
-
+  // return (total vault balance) * (nfts_owned/total_nfts)
   function _pendingPayment(uint256 numNftVaultKeys, uint256 totalReceived) private view returns (uint256) {
     return (totalReceived * numNftVaultKeys) / nftVaultKey.totalSupply();
   }
@@ -108,8 +104,9 @@ contract DCNTVault is Ownable {
     if (hasClaimedTokenId[tokenId]) revert AlreadyClaimed();
     // mark it claimed and send token (confused why doing this before not after calling transfer)
     hasClaimedTokenId[tokenId] = true;
-    uint256 amount = amountClaimed(1);
+    uint256 amount = _pendingPayment(1, vaultBalance() + totalReleased());
     require(vaultDistributionToken.transfer(to, amount), 'Transfer failed');
+    _totalReleased += amount;
     emit Claimed(to, amount);
   }
 
