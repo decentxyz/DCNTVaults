@@ -1,4 +1,4 @@
 # DCNT Vaults
-A time-locked erc-20 vault that wraps an nft collection 
+A time-locked vault that distributes erc-20 tokens to owners of an nft-collection at expiry 
 
 
