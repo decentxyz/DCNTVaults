@@ -50,8 +50,8 @@ contract DecentNft is ERC721Enumerable, Ownable {
     require(msg.value >= (tokenPrice * numberOfTokens), "Insufficient funds");
 
     for(uint256 i = 0; i < numberOfTokens; i++) {
-      _safeMint(msg.sender, mintIndex++);
-      emit Minted(msg.sender, mintIndex - 1);
+      _safeMint(msg.sender, mintIndex);
+      emit Minted(msg.sender, mintIndex++);
     }
   }
 
