@@ -75,10 +75,6 @@ contract DCNTVault is Ownable {
   }
 
   function _pendingPayment(uint256 numNftVaultKeys, uint256 totalReceived) private view returns (uint256) {
-    // console.log("pending payment: %s,  numNftKeys: %s, totalSupply: %s", l);
-    // console.log("totalReceived: %s", totalReceived);
-    // console.log("numNftVaultKeys: %s", numNftVaultKeys);
-    // console.log("totalSupply: %s", nftVaultKey.totalSupply());
     return (totalReceived * numNftVaultKeys) / nftVaultKey.totalSupply();
   }
 
@@ -95,8 +91,7 @@ contract DCNTVault is Ownable {
         hasClaimedTokenId[tokenId] = true;
       }
     }
-    // require(tokensToClaim > 0, 'address does not own token');
-    // console.log("tokens to claim: %s", tokensToClaim);
+
     uint256 amount = _pendingPayment(tokensToClaim, vaultBalance() + totalReleased());
     require(amount > 0, 'no tokens to claim');
     require(vaultDistributionToken.transfer(to, amount), 'Transfer failed');
@@ -118,13 +113,9 @@ contract DCNTVault is Ownable {
     emit Claimed(to, amount);
   }
 
-  // allows vault owner to claim ETH + ERC20 tokens sent to account
+  // allows vault owner to claim ERC20 tokens sent to account
   // failsafe in case money needs to be taken off chain
-  function drain(IERC20 token, bool justEth) public onlyOwner {
-    if (justEth) {
-      payable(msg.sender).transfer(address(this).balance);
-    } else {
-      token.transfer(msg.sender, token.balanceOf(address(this)));
-    }
+  function drain(IERC20 token) public onlyOwner {
+    token.transfer(msg.sender, token.balanceOf(address(this)));
   }
 }
