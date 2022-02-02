@@ -49,7 +49,6 @@ contract DCNTVault is Ownable {
   /// @param _nftVaultKeyAddress of token
   /// @param _unlockDate date of vault expiration
   constructor(
-    // for our purpose USDC = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
     address _vaultDistributionTokenAddress, 
     address _nftVaultKeyAddress,
     uint256 _unlockDate
