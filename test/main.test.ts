@@ -57,7 +57,7 @@ describe("DCNTVault contract", () => {
         token.address,
         nft.address,
         Math.floor(currentDate.getTime() / 1000)
-      )
+      );
     })
     
     describe("initial deployment", async () => {
@@ -111,7 +111,7 @@ describe("DCNTVault contract", () => {
         token.address,
         nft.address,
         Math.floor(tomorrow.getTime() / 1000)
-      )
+      );
 
       // send 100 tokens to the vault
       await token.connect(addr1).transfer(vault.address, 100);
@@ -165,14 +165,14 @@ describe("DCNTVault contract", () => {
       describe("and a user without any nft keys tries to redeem tokens", async () => {
         it("he would recieve zero tokens", async () => {
           await expect(unlockedVault.claimAll(addr4.address)).to.be.revertedWith(
-            'no tokens to claim'
+            'address has no claimable tokens'
           );
         })
       })
 
       describe("and a user with one nft tries to redeem his tokens (1/5 nfts * 100 tokens)", async () => {
         it("should transfer 20 tokens to the user's account", async () => {
-          await unlockedVault.claimAll(addr1.address)
+          await unlockedVault.claimAll(addr1.address);
           expect(await token.balanceOf(addr1.address)).to.equal(20);
         })
       })
@@ -180,16 +180,16 @@ describe("DCNTVault contract", () => {
       describe("and a user who has already redeemed his tokens tries to redeem again", async () => {
         it("should prevent the user from doing this", async () => {
           await expect(unlockedVault.claimAll(addr1.address)).to.be.revertedWith(
-            'no tokens to claim'
+            'address has no claimable tokens'
           );
         })
       })
       
       describe("and a user with two nfts tries to redeem tokens (2/5 * 100)", async () => {
         it("should should transfer 40 tokens to the user's account", async () => {
-          await unlockedVault.claimAll(addr2.address)
+          await unlockedVault.claimAll(addr2.address);
           // balance will equal 40
-          expect(await token.balanceOf(addr2.address)).to.equal(40)
+          expect(await token.balanceOf(addr2.address)).to.equal(40);
         })
       })
     })
@@ -217,15 +217,15 @@ describe("DCNTVault contract", () => {
       await token.connect(addr1).transfer(unlockedVault.address, 73);
     })
 
-    describe("and a user with three of eleven nfts tries to redeem tokens (3/11 * 73)", async () => {
-      it("should should transfer 19.9(~ish) tokens to the user's account", async () => {
+    describe("and a user with three of eleven nfts tries to redeem tokens (3 * 73)/11", async () => {
+      it("should should transfer 19 tokens to the user's account", async () => {
         await unlockedVault.claimAll(addr1.address);
         expect(await token.balanceOf(addr1.address)).to.equal(19);
       })
     })
 
     describe("and he then receives another one and tries to redeem it", async () => {
-      it("should should transfer 6.6(~ish) tokens to the user's account (1/11 * 73)", async () => {
+      it("should should transfer 6 tokens to the user's account (1 * 73)/11", async () => {
         // await nft.connect(addr2).safeTransferFrom(addr2.address, addr1.address, 3);
         await nft.connect(addr2)["safeTransferFrom(address,address,uint256)"](addr2.address, addr1.address, 3);
         await unlockedVault.claimAll(addr1.address);
@@ -234,12 +234,27 @@ describe("DCNTVault contract", () => {
     }) 
     
     describe("and he then receives another one thats already been claimed and tries to redeem it", async () => {
-      it("should should return an error", async () => {
+      it("should return an error", async () => {
         await unlockedVault.claimAll(addr3.address);
         await nft.connect(addr3)["safeTransferFrom(address,address,uint256)"](addr3.address, addr1.address, 4);
         await expect(unlockedVault.claimAll(addr1.address)).to.be.revertedWith(
-          'no tokens to claim'
+          'address has no claimable tokens'
         );
+      })
+    })
+
+    describe("and a user tries to claim an already claimed token", async () => {
+      it("should revert with token already claimed", async () => {
+        await expect(unlockedVault.claim(addr1.address, 0)).to.be.revertedWith(
+          "token already claimed"
+        );
+      })
+    })
+    
+    describe("and a user tries to claim one token using claim", async () => {
+      it("should show user w balance of 1/11 * 73 tokens (~6)", async () => {
+        await unlockedVault.claim(addr4.address, 5);
+        expect(await token.balanceOf(addr4.address)).to.equal(6);
       })
     })
   })

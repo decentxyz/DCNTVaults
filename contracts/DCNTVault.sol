@@ -37,11 +37,6 @@ contract DCNTVault is Ownable {
   /// @param amount of tokens claimed
   event Claimed(address account, uint256 amount);
 
-  /// ============ Errors ============
-
-  /// @notice Thrown if address has already claimed
-  error AlreadyClaimed();
-
   /// ============ Constructor ============
 
   /// @notice Creates a new vault
@@ -60,15 +55,17 @@ contract DCNTVault is Ownable {
 
   /// ============ Functions ============
 
+  // returns balance of vault
   function vaultBalance() public view returns (uint256) {
     return vaultDistributionToken.balanceOf(address(this));
   }
 
+  // returns total # of tokens already released from vault
   function totalReleased() public view returns (uint256) {
     return _totalReleased;
   }
 
-  // return (total vault balance) * (nfts_owned/total_nfts)
+  // (total vault balance) * (nfts_owned/total_nfts)
   function _pendingPayment(uint256 numNftVaultKeys, uint256 totalReceived) private view returns (uint256) {
     return (totalReceived * numNftVaultKeys) / nftVaultKey.totalSupply();
   }
@@ -88,20 +85,21 @@ contract DCNTVault is Ownable {
     }
 
     uint256 amount = _pendingPayment(tokensToClaim, vaultBalance() + totalReleased());
-    require(amount > 0, 'no tokens to claim');
+    require(amount > 0, 'address has no claimable tokens');
     require(vaultDistributionToken.transfer(to, amount), 'Transfer failed');
     _totalReleased += amount;
     emit Claimed(to, amount);
   }
 
-  // serves similar purpose to claim all but allows user to only claim
+  // serves similar purpose to claim all but allows user to claim specific
   // token for one of NFTs in collection
   function claim(address to, uint256 tokenId) external {
     require(block.timestamp >= unlockDate, 'vault is still locked');
     require(vaultBalance() > 0, 'vault is empty');
     require(nftVaultKey.ownerOf(tokenId) == to, 'address does not own token');
-    if (hasClaimedTokenId[tokenId]) revert AlreadyClaimed();
-    // mark it claimed and send token (confused why doing this before not after calling transfer)
+    require(!hasClaimedTokenId[tokenId], 'token already claimed');
+
+    // mark it claimed and send token
     hasClaimedTokenId[tokenId] = true;
     uint256 amount = _pendingPayment(1, vaultBalance() + totalReleased());
     require(vaultDistributionToken.transfer(to, amount), 'Transfer failed');
@@ -113,5 +111,9 @@ contract DCNTVault is Ownable {
   // failsafe in case money needs to be taken off chain
   function drain(IERC20 token) public onlyOwner {
     token.transfer(msg.sender, token.balanceOf(address(this)));
+  }
+  
+  function drainEth() public onlyOwner {
+    payable(msg.sender).transfer(address(this).balance);
   }
 }
