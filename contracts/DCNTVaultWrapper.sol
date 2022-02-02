@@ -8,9 +8,9 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-/// @title Decentralized Creator Nonfungible Token Vaults (DCNT Vaults)
+/// @title Decentralized Creator Nonfungible Token Vault Wrapper (DCNT VWs)
 /// @notice claimable ERC20s for NFT holders after vault expiration 
-contract DCNTVault is Ownable {
+contract DCNTVaultWrapper is Ownable {
 
   /// ============ Immutable storage ============
 

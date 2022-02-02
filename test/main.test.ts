@@ -24,21 +24,21 @@ const deployNFT = async () => {
   return await erc721Token.deployed();
 }
 
-const deployDCNTVault = async (
+const deployDCNTVaultWrapper = async (
   _vaultDistributionTokenAddress: string,
   _NftWrapperTokenAddress: string,
   _unlockDate: number
 ) => {
-  const DCNTVault = await ethers.getContractFactory("DCNTVault");
-  const dcntVault = await DCNTVault.deploy(
+  const DCNTVaultWrapper = await ethers.getContractFactory("DCNTVaultWrapper");
+  const dcntVaultWrapper = await DCNTVaultWrapper.deploy(
     _vaultDistributionTokenAddress,
     _NftWrapperTokenAddress,
     _unlockDate
   );
-  return await dcntVault.deployed();
+  return await dcntVaultWrapper.deployed();
 }
 
-describe("DCNTVault contract", () => {
+describe("DCNTVaultWrapper contract", () => {
   let token: Contract, nft: Contract, vault: Contract, unlockedVault: Contract;
   let addr1: SignerWithAddress, 
       addr2: SignerWithAddress, 
@@ -53,7 +53,7 @@ describe("DCNTVault contract", () => {
       nft = await deployNFT();
       token = await deployERC20(100);
       // token.setBalance(owner.address, 100);
-      vault = await deployDCNTVault(
+      vault = await deployDCNTVaultWrapper(
         token.address,
         nft.address,
         Math.floor(currentDate.getTime() / 1000)
@@ -107,7 +107,7 @@ describe("DCNTVault contract", () => {
       await nft.connect(addr2).mintNft(2);
       await nft.connect(addr3).mintNft(2);
 
-      vault = await deployDCNTVault(
+      vault = await deployDCNTVaultWrapper(
         token.address,
         nft.address,
         Math.floor(tomorrow.getTime() / 1000)
@@ -150,7 +150,7 @@ describe("DCNTVault contract", () => {
       await nft.connect(addr2).mintNft(2);
       await nft.connect(addr3).mintNft(2);
 
-      unlockedVault = await deployDCNTVault(
+      unlockedVault = await deployDCNTVaultWrapper(
         token.address,
         nft.address,
         Math.floor(yesterday.getTime() / 1000)
@@ -209,7 +209,7 @@ describe("DCNTVault contract", () => {
       await nft.connect(addr3).mintNft(1);
       await nft.connect(addr4).mintNft(6);
       // token.setBalance(owner.address, 100);
-      unlockedVault = await deployDCNTVault(
+      unlockedVault = await deployDCNTVaultWrapper(
         token.address,
         nft.address,
         Math.floor(yesterday.getTime() / 1000)
