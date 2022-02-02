@@ -17,5 +17,5 @@ For example, suppose a collection of 100 NFTs are minted. A DCNT VW can then be 
 
 Note these contracts have not been audited
 
-Would love any feedback (join our [discord](https://discord.com/invite/YVbxe6nhRv)!) 
+Would love any feedback (join our [discord](https://discord.com/invite/YVbxe6nhRv) or reach out @ twitter.com/willkantaros) 
 
