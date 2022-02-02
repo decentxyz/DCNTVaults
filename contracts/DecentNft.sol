@@ -6,9 +6,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/// 
-/// @title Decentralized Creator Nonfungible Tokens
-/// @notice claimable ERC20s for NFT holders after vault expiration 
+/// @title template NFT contract
 contract DecentNft is ERC721Enumerable, Ownable {
 
   /// ============ Immutable storage ============
@@ -53,7 +51,7 @@ contract DecentNft is ERC721Enumerable, Ownable {
 
     for(uint256 i = 0; i < numberOfTokens; i++) {
       _safeMint(msg.sender, mintIndex++);
-      emit Minted(msg.sender, mintIndex);
+      emit Minted(msg.sender, mintIndex - 1);
     }
   }
 
