@@ -9,7 +9,7 @@ const deployERC20 = async (amountToMint: number) => {
   const TestERC20 = await ethers.getContractFactory("TestERC20");
   const erc20Token = await TestERC20.deploy(
     "token",
-    "tkn",
+    "TKN",
     amountToMint
   );
   return await erc20Token.deployed();
